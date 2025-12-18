@@ -17,10 +17,8 @@ export const usePomodoroTimer = () => {
     const [isActive, setIsActive] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
 
-    // Używamy ref, aby uniknąć problemów z odtwarzaniem audio w useEffect
     const audioRef = useRef(null);
 
-    // Refs for persistence to avoid closure staleness in event listeners
     const stateRef = useRef({ mode, timeLeft, isActive });
     useEffect(() => {
         stateRef.current = { mode, timeLeft, isActive };
@@ -30,18 +28,15 @@ export const usePomodoroTimer = () => {
         audioRef.current = new Audio('/notification.mp3');
     }, []);
 
-    // Load State on Mount
     useEffect(() => {
         const loadState = () => {
             try {
                 const saved = localStorage.getItem('pomodoro_timer_state');
                 if (saved) {
                     const parsed = JSON.parse(saved);
-                    // Ensure valid mode
                     if (Object.values(MODES).includes(parsed.mode)) {
                         setMode(parsed.mode);
                         setTimeLeft(parsed.timeLeft);
-                        // We do not auto-resume to avoid confusion, user must click play
                         setIsActive(false);
                     }
                 }
@@ -54,24 +49,21 @@ export const usePomodoroTimer = () => {
         loadState();
     }, []);
 
-    // Save State on Unmount / Tab Close
     useEffect(() => {
         const handleUnload = () => {
             localStorage.setItem('pomodoro_timer_state', JSON.stringify({
                 mode: stateRef.current.mode,
                 timeLeft: stateRef.current.timeLeft,
-                isActive: stateRef.current.isActive // save active state if needed, though we pause on reload
+                isActive: stateRef.current.isActive
             }));
         };
         window.addEventListener('beforeunload', handleUnload);
         return () => {
             window.removeEventListener('beforeunload', handleUnload);
-            // Also save on component unmount (navigation)
             handleUnload();
         };
     }, []);
 
-    // Save on Mode Change or Pause (Optional, but good for safety)
     useEffect(() => {
         if (isLoaded) {
             localStorage.setItem('pomodoro_timer_state', JSON.stringify({
@@ -80,7 +72,7 @@ export const usePomodoroTimer = () => {
                 isActive
             }));
         }
-    }, [mode, isActive, isLoaded]); // Not adding timeLeft to avoid spamming LS every second
+    }, [mode, isActive, isLoaded]);
 
     const playSound = () => {
         if (audioRef.current) {
@@ -89,10 +81,8 @@ export const usePomodoroTimer = () => {
         }
     };
 
-    // Reset czasu przy zmianie ustawień (jeśli timer nie chodzi i stan już załadowany)
     useEffect(() => {
         if (isLoaded && !isActive) {
-            // Sprawdzamy, czy ustawienia faktycznie się zmieniły, aby nie nadpisać stanu załadowanego z localStorage
             const settingsChanged = JSON.stringify(prevSettingsRef.current) !== JSON.stringify(timerSettings);
             if (settingsChanged) {
                 setTimeLeft(timerSettings[mode] * 60);
@@ -101,12 +91,9 @@ export const usePomodoroTimer = () => {
         }
     }, [timerSettings, mode, isActive]);
 
-    // Re-implementing the reset-on-settings-change safely
     const prevSettingsRef = useRef(timerSettings);
     useEffect(() => {
         if (!isLoaded) return;
-
-        // Detect if settings actually changed
         const settingsChanged = JSON.stringify(prevSettingsRef.current) !== JSON.stringify(timerSettings);
 
         if (settingsChanged && !isActive) {
@@ -143,8 +130,6 @@ export const usePomodoroTimer = () => {
             interval = setInterval(() => {
                 setTimeLeft((prev) => {
                     const newVal = prev - 1;
-                    // Optional: Save every 5s?
-                    // if (newVal % 5 === 0) { localStorage.setItem(...) } 
                     return newVal;
                 });
             }, 1000);

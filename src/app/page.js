@@ -8,14 +8,11 @@ import { FaPlay, FaPause, FaRedo, FaTrash, FaCheck } from 'react-icons/fa';
 
 export default function Home() {
     const { timeLeft, isActive, mode, toggleTimer, resetTimer, formatTime, switchMode, MODES } = usePomodoroTimer();
+
     const { tasks, addTask, deleteTask, toggleTask, recordPomodoro } = useTasks();
+
     const [newTaskInput, setNewTaskInput] = useState('');
     const [activeTaskId, setActiveTaskId] = useState(null);
-
-    // Sprawdzamy, czy timer skończył odliczanie (prosta detekcja dla zapisu statystyk)
-    // W idealnym świecie hook zwracałby event, tu zrobimy to manualnie przyciskiem lub auto
-    // Uproszczenie: Użytkownik ręcznie klika "+" przy zadaniu, lub dodamy logikę w hooku (bardziej skomplikowane).
-    // Tutaj: Dodaj przycisk "Zalicz sesję" dla zadania.
 
     const handleAddTask = () => {
         if (newTaskInput.trim()) {
@@ -26,6 +23,7 @@ export default function Home() {
 
     return (
         <div className={`timer-container mode-${mode} card`}>
+            {/* Nagłówek z przełącznikami trybów pracy/przerwy */}
             <header className="timer-header">
                 <button
                     className={mode === MODES.WORK ? 'active' : ''}
@@ -60,8 +58,11 @@ export default function Home() {
                 </button>
             </div>
 
+            {/* Sekcja zarządzania zadaniami */}
             <div className="tasks-section" style={{ marginTop: '2rem', textAlign: 'left' }}>
                 <h3>Zadania</h3>
+
+                {/* Formularz dodawania zadania */}
                 <div className="add-task">
                     <input
                         value={newTaskInput}
@@ -72,12 +73,15 @@ export default function Home() {
                     <button className="btn-primary" onClick={handleAddTask}>Dodaj</button>
                 </div>
 
+                {/* Lista zadań */}
                 <ul>
                     {tasks.map((task) => (
                         <li key={task.id} className={task.completed ? 'completed' : ''}>
                             <span className="title" onClick={() => setActiveTaskId(task.id)}>
                                 {activeTaskId === task.id ? '👉 ' : ''}{task.title}
                             </span>
+
+                            {/* Akcje dla konkretnego zadania */}
                             <div className="task-actions">
                                 <span style={{ marginRight: '10px', fontSize: '0.9rem' }}>
                                     🍅 {task.pomodoros}
@@ -90,7 +94,6 @@ export default function Home() {
                     ))}
                 </ul>
             </div>
-
             <QuoteDisplay />
         </div>
     );
