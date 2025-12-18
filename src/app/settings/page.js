@@ -63,11 +63,9 @@ export default function Settings() {
                 <button type="submit" className="btn-primary">Zapisz ustawienia</button>
             </form>
 
-            <hr style={{ margin: '2rem 0', borderColor: 'var(--border-color)' }} />
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="settings-footer">
                 <span>Aktualny motyw: <strong>{theme === 'light' ? 'Jasny' : 'Ciemny'}</strong></span>
-                <button className="btn-primary" type="button" onClick={toggleTheme} style={{ background: '#555' }}>
+                <button className="btn-primary btn-secondary" type="button" onClick={toggleTheme}>
                     Zmień Motyw
                 </button>
             </div>

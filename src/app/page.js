@@ -1,99 +1,32 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { usePomodoroTimer } from '@/hooks/usePomodoroTimer';
 import { useTasks } from '@/context/TaskContext';
 import QuoteDisplay from '@/components/QuoteDisplay';
-import { FaPlay, FaPause, FaRedo, FaTrash, FaCheck } from 'react-icons/fa';
+import TimerHeader from '@/components/TimerHeader';
+import TimerControls from '@/components/TimerControls';
+import TasksSection from '@/components/TasksSection';
 
 export default function Home() {
     const { timeLeft, isActive, mode, toggleTimer, resetTimer, formatTime, switchMode, MODES } = usePomodoroTimer();
-
-    const { tasks, addTask, deleteTask, toggleTask, recordPomodoro } = useTasks();
-
-    const [newTaskInput, setNewTaskInput] = useState('');
-    const [activeTaskId, setActiveTaskId] = useState(null);
-
-    const handleAddTask = () => {
-        if (newTaskInput.trim()) {
-            addTask(newTaskInput);
-            setNewTaskInput('');
-        }
-    };
+    const taskProps = useTasks(); // Pass the whole context object or spread it
 
     return (
         <div className={`timer-container mode-${mode} card`}>
-            {/* Nagłówek z przełącznikami trybów pracy/przerwy */}
-            <header className="timer-header">
-                <button
-                    className={mode === MODES.WORK ? 'active' : ''}
-                    onClick={() => switchMode(MODES.WORK)}
-                >
-                    Praca
-                </button>
-                <button
-                    className={mode === MODES.SHORT_BREAK ? 'active' : ''}
-                    onClick={() => switchMode(MODES.SHORT_BREAK)}
-                >
-                    Krótka Przerwa
-                </button>
-                <button
-                    className={mode === MODES.LONG_BREAK ? 'active' : ''}
-                    onClick={() => switchMode(MODES.LONG_BREAK)}
-                >
-                    Długa Przerwa
-                </button>
-            </header>
+            <TimerHeader mode={mode} switchMode={switchMode} MODES={MODES} />
 
             <div className={`timer-circle ${isActive ? 'active' : ''}`}>
                 {formatTime(timeLeft)}
             </div>
 
-            <div className="controls">
-                <button onClick={toggleTimer} aria-label="Start/Pauza">
-                    {isActive ? <FaPause /> : <FaPlay />}
-                </button>
-                <button onClick={resetTimer} aria-label="Reset">
-                    <FaRedo />
-                </button>
-            </div>
+            <TimerControls
+                isActive={isActive}
+                toggleTimer={toggleTimer}
+                resetTimer={resetTimer}
+            />
 
-            {/* Sekcja zarządzania zadaniami */}
-            <div className="tasks-section" style={{ marginTop: '2rem', textAlign: 'left' }}>
-                <h3>Zadania</h3>
-
-                {/* Formularz dodawania zadania */}
-                <div className="add-task">
-                    <input
-                        value={newTaskInput}
-                        onChange={(e) => setNewTaskInput(e.target.value)}
-                        placeholder="Dodaj zadanie..."
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
-                    />
-                    <button className="btn-primary" onClick={handleAddTask}>Dodaj</button>
-                </div>
-
-                {/* Lista zadań */}
-                <ul>
-                    {tasks.map((task) => (
-                        <li key={task.id} className={task.completed ? 'completed' : ''}>
-                            <span className="title" onClick={() => setActiveTaskId(task.id)}>
-                                {activeTaskId === task.id ? '👉 ' : ''}{task.title}
-                            </span>
-
-                            {/* Akcje dla konkretnego zadania */}
-                            <div className="task-actions">
-                                <span style={{ marginRight: '10px', fontSize: '0.9rem' }}>
-                                    🍅 {task.pomodoros}
-                                </span>
-                                <button onClick={() => recordPomodoro(task.id)} title="Zalicz Pomodoro">+</button>
-                                <button onClick={() => toggleTask(task.id)} title="Ukończ"><FaCheck /></button>
-                                <button onClick={() => deleteTask(task.id)} title="Usuń"><FaTrash /></button>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            </div>
+            <TasksSection {...taskProps} />
             <QuoteDisplay />
         </div>
     );

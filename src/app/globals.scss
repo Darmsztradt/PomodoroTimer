@@ -84,6 +84,40 @@ body.dark-mode {
     }
 }
 
+.quote-box {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    font-style: italic;
+
+    .quote-author {
+        margin-top: 0.5rem;
+        font-weight: 600;
+        font-style: normal;
+        font-size: 0.85rem;
+        opacity: 0.8;
+    }
+}
+
+.settings-footer {
+    @include flex-between;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+
+    .btn-secondary {
+        background: #555;
+
+        &:hover {
+            background: #666;
+        }
+    }
+}
+
 body {
     margin: 0;
     font-family: sans-serif;
@@ -406,6 +440,11 @@ button:disabled {
             .task-actions {
                 display: flex;
                 gap: 5px;
+
+                .pomodoro-count {
+                    margin-right: 10px;
+                    font-size: 0.9rem;
+                }
 
                 button {
                     @extend %ghost-button;
