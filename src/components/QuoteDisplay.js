@@ -15,11 +15,11 @@ export default function QuoteDisplay() {
     const { data: quote, isLoading, error } = useQuery({
         queryKey: ['quote'],
         queryFn: fetchQuote,
-        refetchOnWindowFocus: false, // Don't annoy user with constant refetches
+        refetchOnWindowFocus: false,
     });
 
     if (isLoading) return <div style={{ textAlign: 'center', opacity: 0.6, fontSize: '0.9rem' }}>Ładowanie motywacji...</div>;
-    if (error) return null; // Hide silently on error to not disturb UI
+    if (error) return null;
 
     if (!quote) return null;
 

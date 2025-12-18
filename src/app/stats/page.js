@@ -6,14 +6,12 @@ import { useTasks } from '../../context/TaskContext';
 export default function Stats() {
     const { stats } = useTasks();
 
-    // Generate last 7 days
     const days = Array.from({ length: 7 }, (_, i) => {
         const d = new Date();
-        d.setDate(d.getDate() - (6 - i)); // 6 days ago to today
+        d.setDate(d.getDate() - (6 - i));
         return d.toISOString().split('T')[0];
     });
 
-    // Formatting date to Day name (e.g. Mon, Tue)
     const getDayName = (dateStr) => {
         const date = new Date(dateStr);
         return date.toLocaleDateString('pl-PL', { weekday: 'short' });

@@ -10,15 +10,20 @@ const MODES = {
     LONG_BREAK: 'long_break',
 };
 
+const STORAGE_KEY = 'pomodoro_timer_state';
+
 export const usePomodoroTimer = () => {
     const { timerSettings, volume } = useSettings();
     const [mode, setMode] = useState(MODES.WORK);
+    // Inicializacja
     const [timeLeft, setTimeLeft] = useState(timerSettings.work * 60);
     const [isActive, setIsActive] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
 
     const audioRef = useRef(null);
+    const prevSettingsRef = useRef(timerSettings);
 
+    // State ref
     const stateRef = useRef({ mode, timeLeft, isActive });
     useEffect(() => {
         stateRef.current = { mode, timeLeft, isActive };
@@ -28,110 +33,80 @@ export const usePomodoroTimer = () => {
         audioRef.current = new Audio('/notification.mp3');
     }, []);
 
+    // ładowanie i zapisanie stanu
     useEffect(() => {
-        const loadState = () => {
-            try {
-                const saved = localStorage.getItem('pomodoro_timer_state');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    if (Object.values(MODES).includes(parsed.mode)) {
-                        setMode(parsed.mode);
-                        setTimeLeft(parsed.timeLeft);
-                        setIsActive(false);
-                    }
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (Object.values(MODES).includes(parsed.mode)) {
+                    setMode(parsed.mode);
+                    setTimeLeft(parsed.timeLeft);
+                    // Always start paused to avoid confusion
+                    setIsActive(false);
                 }
-            } catch (e) {
-                console.error("Failed to load timer state", e);
-            } finally {
-                setIsLoaded(true);
             }
-        };
-        loadState();
-    }, []);
+        } catch (e) {
+            console.error("Failed to load timer state", e);
+        } finally {
+            setIsLoaded(true);
+        }
 
-    useEffect(() => {
         const handleUnload = () => {
-            localStorage.setItem('pomodoro_timer_state', JSON.stringify({
-                mode: stateRef.current.mode,
-                timeLeft: stateRef.current.timeLeft,
-                isActive: stateRef.current.isActive
-            }));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(stateRef.current));
         };
         window.addEventListener('beforeunload', handleUnload);
-        return () => {
-            window.removeEventListener('beforeunload', handleUnload);
-            handleUnload();
-        };
+        return () => window.removeEventListener('beforeunload', handleUnload);
     }, []);
 
     useEffect(() => {
         if (isLoaded) {
-            localStorage.setItem('pomodoro_timer_state', JSON.stringify({
-                mode,
-                timeLeft,
-                isActive
-            }));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ mode, timeLeft, isActive }));
         }
     }, [mode, isActive, isLoaded]);
 
-    const playSound = () => {
-        if (audioRef.current) {
-            audioRef.current.volume = volume;
-            audioRef.current.play().catch((e) => console.log('Błąd audio:', e));
-        }
-    };
-
-    useEffect(() => {
-        if (isLoaded && !isActive) {
-            const settingsChanged = JSON.stringify(prevSettingsRef.current) !== JSON.stringify(timerSettings);
-            if (settingsChanged) {
-                setTimeLeft(timerSettings[mode] * 60);
-                prevSettingsRef.current = timerSettings;
-            }
-        }
-    }, [timerSettings, mode, isActive]);
-
-    const prevSettingsRef = useRef(timerSettings);
+    // zmiany ustawień
     useEffect(() => {
         if (!isLoaded) return;
-        const settingsChanged = JSON.stringify(prevSettingsRef.current) !== JSON.stringify(timerSettings);
 
-        if (settingsChanged && !isActive) {
-            setTimeLeft(timerSettings[mode] * 60);
+        const settingsChanged = JSON.stringify(prevSettingsRef.current) !== JSON.stringify(timerSettings);
+        if (settingsChanged) {
+            if (!isActive) {
+                setTimeLeft(timerSettings[mode] * 60);
+            }
             prevSettingsRef.current = timerSettings;
         }
     }, [timerSettings, mode, isActive, isLoaded]);
 
 
-    const switchMode = useCallback(
-        (newMode) => {
-            setMode(newMode);
-            setTimeLeft(timerSettings[newMode] * 60);
-            setIsActive(timerSettings.autoStart);
-        },
-        [timerSettings]
-    );
+    const playSound = useCallback(() => {
+        if (audioRef.current) {
+            audioRef.current.volume = volume;
+            audioRef.current.play().catch((e) => console.log('Audio error:', e));
+        }
+    }, [volume]);
+
+    const switchMode = useCallback((newMode) => {
+        setMode(newMode);
+        setTimeLeft(timerSettings[newMode] * 60);
+        setIsActive(timerSettings.autoStart);
+    }, [timerSettings]);
 
     const handleTimerComplete = useCallback(() => {
         playSound();
         if (mode === MODES.WORK) confetti();
         setIsActive(false);
 
-        if (mode === MODES.WORK) {
-            switchMode(MODES.SHORT_BREAK);
-        } else {
-            switchMode(MODES.WORK);
-        }
-    }, [mode, switchMode, volume]);
+        const nextMode = mode === MODES.WORK ? MODES.SHORT_BREAK : MODES.WORK;
+        switchMode(nextMode);
+    }, [mode, switchMode, playSound]);
 
+    // interwał
     useEffect(() => {
         let interval = null;
         if (isActive && timeLeft > 0) {
             interval = setInterval(() => {
-                setTimeLeft((prev) => {
-                    const newVal = prev - 1;
-                    return newVal;
-                });
+                setTimeLeft((prev) => prev - 1);
             }, 1000);
         } else if (timeLeft === 0 && isActive) {
             handleTimerComplete();
@@ -158,8 +133,8 @@ export const usePomodoroTimer = () => {
         mode,
         toggleTimer,
         resetTimer,
-        switchMode,
         formatTime,
+        switchMode,
         MODES,
     };
 };

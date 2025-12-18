@@ -49,16 +49,14 @@ export const TaskProvider = ({ children }) => {
     };
 
     const recordPomodoro = (taskId) => {
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const today = new Date().toISOString().split('T')[0];
 
-        // Jeśli wybrano zadanie, zwiększ licznik dla niego
         if (taskId) {
             setTasks((prev) =>
                 prev.map((t) => (t.id === taskId ? { ...t, pomodoros: t.pomodoros + 1 } : t))
             );
         }
 
-        // Aktualizacja ogólnych statystyk
         setStats((prev) => ({
             ...prev,
             totalPomodoros: prev.totalPomodoros + 1,
