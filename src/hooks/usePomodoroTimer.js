@@ -42,7 +42,6 @@ export const usePomodoroTimer = () => {
                 if (Object.values(MODES).includes(parsed.mode)) {
                     setMode(parsed.mode);
                     setTimeLeft(parsed.timeLeft);
-                    // Always start paused to avoid confusion
                     setIsActive(false);
                 }
             }
