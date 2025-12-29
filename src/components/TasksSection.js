@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
 import { FaTrash, FaCheck } from 'react-icons/fa';
+import { useToast } from '../context/ToastContext';
 
 export default function TasksSection({ tasks, addTask, deleteTask, toggleTask, recordPomodoro }) {
     const [newTaskInput, setNewTaskInput] = useState('');
     const [activeTaskId, setActiveTaskId] = useState(null);
+    const { addToast } = useToast();
 
     const handleAddTask = () => {
         if (newTaskInput.trim()) {
             addTask(newTaskInput);
             setNewTaskInput('');
+            addToast('Zadanie dodane! 🚀', 'success');
         }
+    };
+
+    const handleTaskAction = (action, id, message) => {
+        action(id);
+        addToast(message, 'info');
     };
 
     return (
@@ -37,9 +45,9 @@ export default function TasksSection({ tasks, addTask, deleteTask, toggleTask, r
                             <span className="pomodoro-count">
                                 🍅 {task.pomodoros}
                             </span>
-                            <button onClick={() => recordPomodoro(task.id)} title="Zalicz Pomodoro">+</button>
-                            <button onClick={() => toggleTask(task.id)} title="Ukończ"><FaCheck /></button>
-                            <button onClick={() => deleteTask(task.id)} title="Usuń"><FaTrash /></button>
+                            <button onClick={() => handleTaskAction(recordPomodoro, task.id, 'Pomodoro zaliczone! 🍅')} title="Zalicz Pomodoro">+</button>
+                            <button onClick={() => handleTaskAction(toggleTask, task.id, 'Status zadania zmieniony ✅')} title="Ukończ"><FaCheck /></button>
+                            <button onClick={() => handleTaskAction(deleteTask, task.id, 'Zadanie usunięte 🗑️')} title="Usuń"><FaTrash /></button>
                         </div>
                     </li>
                 ))}

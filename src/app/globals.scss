@@ -349,16 +349,16 @@ button:disabled {
         cursor: pointer;
         transition: all var(--transition-fast) ease;
         box-shadow: var(--shadow-md);
-        width: 60px;
-        height: 60px;
+        width: 80px;
+        height: 80px;
         border-radius: 50%;
-        font-size: 1.5rem;
+        font-size: 2rem;
         color: var(--text-color);
 
         @include mobile {
-            width: 50px;
-            height: 50px;
-            font-size: 1.2rem;
+            width: 70px;
+            height: 70px;
+            font-size: 1.6rem;
         }
 
         &:hover {
@@ -372,17 +372,8 @@ button:disabled {
 
         /* Start/Pause */
         &:first-child {
-            width: 80px;
-            height: 80px;
-            font-size: 2rem;
             background: var(--primary-color);
             color: white;
-
-            @include mobile {
-                width: 70px;
-                height: 70px;
-                font-size: 1.6rem;
-            }
         }
 
         /* Reset */
@@ -640,4 +631,81 @@ button:disabled {
 
 .page-transition {
     animation: slideUp 0.4s ease-out forwards;
+}
+
+/* Toast Notifications - Premium Design */
+.toast-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 10000;
+    pointer-events: none;
+    /* Allow clicks to pass through container */
+}
+
+.toast {
+    pointer-events: auto;
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-left: 6px solid var(--primary-color);
+    border-radius: 16px;
+    box-shadow:
+        0 4px 6px rgba(0, 0, 0, 0.05),
+        0 10px 15px rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 0.95rem;
+    min-width: 300px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transform-origin: right center;
+    animation: toastEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+
+    &.toast-success {
+        border-left-color: #00b894;
+        background: linear-gradient(to right, rgba(0, 184, 148, 0.1), rgba(255, 255, 255, 0.8));
+    }
+
+    &.toast-error {
+        border-left-color: #d63031;
+        background: linear-gradient(to right, rgba(214, 48, 49, 0.1), rgba(255, 255, 255, 0.8));
+    }
+
+    &.toast-info {
+        border-left-color: #0984e3;
+    }
+}
+
+body.dark-mode .toast {
+    background: rgba(45, 52, 54, 0.85);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #dfe6e9;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+
+    &.toast-success {
+        background: linear-gradient(to right, rgba(0, 184, 148, 0.2), rgba(45, 52, 54, 0.9));
+    }
+
+    &.toast-error {
+        background: linear-gradient(to right, rgba(214, 48, 49, 0.2), rgba(45, 52, 54, 0.9));
+    }
+}
+
+@keyframes toastEnter {
+    from {
+        opacity: 0;
+        transform: translateX(100%) scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
 }
