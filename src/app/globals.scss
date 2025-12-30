@@ -1,5 +1,4 @@
 :root {
-    /* Colors */
     --bg-color: #f4f7f6;
     --card-bg: #ffffff;
     --text-color: #333333;
@@ -14,12 +13,10 @@
     --border-color: #ddd;
     --task-input-bg: #f8f9fa;
 
-    /* Shadows */
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     --shadow-hover: 0 6px 12px rgba(0, 0, 0, 0.15);
 
-    /* Transitions */
     --transition-fast: 0.2s ease;
     --transition-normal: 0.3s ease;
 }
@@ -33,7 +30,6 @@ body.dark-mode {
     --task-input-bg: #1e272e;
 }
 
-/* Mixins & Placeholders */
 @mixin mobile {
     @media (max-width: 768px) {
         @content;
@@ -633,7 +629,7 @@ button:disabled {
     animation: slideUp 0.4s ease-out forwards;
 }
 
-/* Toast Notifications - Premium Design */
+/* Toast Notifications*/
 .toast-container {
     position: fixed;
     bottom: 30px;
@@ -643,7 +639,6 @@ button:disabled {
     gap: 15px;
     z-index: 10000;
     pointer-events: none;
-    /* Allow clicks to pass through container */
 }
 
 .toast {

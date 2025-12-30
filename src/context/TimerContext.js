@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useSettings } from './SettingsContext';
 import { useTasks } from './TaskContext';
+import { useToast } from './ToastContext';
+import confetti from 'canvas-confetti';
 
 const TimerContext = createContext();
 
@@ -17,11 +19,18 @@ export const useTimer = () => useContext(TimerContext);
 export const TimerProvider = ({ children }) => {
     const { timerSettings } = useSettings();
     const { recordPomodoro } = useTasks();
+    const { addToast } = useToast();
 
     const initialState = {
         mode: MODES.WORK,
         timeLeft: 25 * 60,
         isActive: false
+    };
+
+    const convertToSeconds = (minutes) => {
+        const m = Math.floor(minutes);
+        const s = Math.round((minutes - m) * 100);
+        return m * 60 + s;
     };
 
     const timerReducer = (state, action) => {
@@ -31,7 +40,7 @@ export const TimerProvider = ({ children }) => {
                     ...state,
                     mode: action.payload,
                     isActive: false,
-                    timeLeft: (timerSettings?.[action.payload] || 25) * 60
+                    timeLeft: convertToSeconds(timerSettings?.[action.payload] || 25)
                 };
             case 'TICK':
                 if (state.timeLeft <= 0) return state;
@@ -48,7 +57,7 @@ export const TimerProvider = ({ children }) => {
                 return {
                     ...state,
                     isActive: false,
-                    timeLeft: (timerSettings?.[state.mode] || 25) * 60
+                    timeLeft: convertToSeconds(timerSettings?.[state.mode] || 25)
                 };
             case 'STOP':
                 return {
@@ -56,11 +65,18 @@ export const TimerProvider = ({ children }) => {
                     isActive: false
                 };
             case 'SYNC_SETTINGS':
-                // Only sync if not active to avoid jumping time
+                // Sync (nieaktywny)
                 if (state.isActive) return state;
                 return {
                     ...state,
-                    timeLeft: (timerSettings?.[state.mode] || 25) * 60
+                    timeLeft: convertToSeconds(timerSettings?.[state.mode] || 25)
+                };
+            case 'NEXT_INTERVAL':
+                return {
+                    ...state,
+                    mode: action.payload.mode,
+                    isActive: action.payload.autoStart,
+                    timeLeft: convertToSeconds(timerSettings?.[action.payload.mode] || 25)
                 };
             default:
                 return state;
@@ -70,7 +86,6 @@ export const TimerProvider = ({ children }) => {
     const [state, dispatch] = React.useReducer(timerReducer, initialState);
     const { mode, timeLeft, isActive } = state;
 
-    // Sync with settings when they change (and timer is not active)
     useEffect(() => {
         if (timerSettings) {
             dispatch({ type: 'SYNC_SETTINGS' });
@@ -81,7 +96,7 @@ export const TimerProvider = ({ children }) => {
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            soundRef.current = new Audio('/sounds/bell.mp3');
+            soundRef.current = new Audio('/notification.mp3');
         }
     }, []);
 
@@ -99,17 +114,32 @@ export const TimerProvider = ({ children }) => {
                 dispatch({ type: 'TICK' });
             }, 1000);
         } else if (timeLeft === 0 && isActive) {
-            // Timer just finished
             clearInterval(interval);
             dispatch({ type: 'STOP' });
             playSound();
             if (mode === MODES.WORK) {
                 recordPomodoro();
+                addToast('Dobra robota! Czas na przerwę! ☕', 'success');
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            } else {
+                addToast('Przerwa minęła! Wracamy do pracy! 🚀', 'info');
             }
+
+            const nextMode = mode === MODES.WORK ? MODES.SHORT_BREAK : MODES.WORK;
+            const shouldAutoStart = timerSettings?.autoStart || false;
+
+            dispatch({
+                type: 'NEXT_INTERVAL',
+                payload: { mode: nextMode, autoStart: shouldAutoStart }
+            });
         }
 
         return () => clearInterval(interval);
-    }, [isActive, timeLeft, mode, recordPomodoro]);
+    }, [isActive, timeLeft, mode, recordPomodoro, timerSettings]);
 
     const toggleTimer = useCallback(() => {
         dispatch({ type: 'TOGGLE' });

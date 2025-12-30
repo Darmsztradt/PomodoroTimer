@@ -9,15 +9,26 @@ export default function Settings() {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+        let newValue = type === 'checkbox' ? checked : parseFloat(value);
+
+        if (type === 'number') {
+            const decimalPart = Math.round((newValue % 1) * 10);
+            if (decimalPart >= 6 && decimalPart <= 8) {
+                newValue = Math.ceil(newValue);
+            } else if (decimalPart === 9) {
+                newValue = Math.floor(newValue) + 0.5;
+            }
+        }
+
         setLocal((prev) => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : parseInt(value),
+            [name]: newValue,
         }));
     };
 
     const handleSave = (e) => {
         e.preventDefault();
-        if (local.work < 1 || local.work > 60) return alert('Błędny czas pracy');
+        if (local.work <= 0 || local.work > 60) return alert('Błędny czas pracy');
         setTimerSettings(local);
         alert('Zapisano!');
     };
@@ -28,15 +39,15 @@ export default function Settings() {
             <form onSubmit={handleSave}>
                 <div className="form-group">
                     <label>Czas Pracy (min):</label>
-                    <input type="number" name="work" value={local.work} onChange={handleChange} />
+                    <input type="number" step="0.1" name="work" value={local.work} onChange={handleChange} />
                 </div>
                 <div className="form-group">
                     <label>Krótka Przerwa (min):</label>
-                    <input type="number" name="short_break" value={local.short_break} onChange={handleChange} />
+                    <input type="number" step="0.1" name="short_break" value={local.short_break} onChange={handleChange} />
                 </div>
                 <div className="form-group">
                     <label>Długa Przerwa (min):</label>
-                    <input type="number" name="long_break" value={local.long_break} onChange={handleChange} />
+                    <input type="number" step="0.1" name="long_break" value={local.long_break} onChange={handleChange} />
                 </div>
 
                 <div className="form-group">

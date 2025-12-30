@@ -12,7 +12,7 @@ export default function Stats() {
         setCurrentDate(new Date());
     }, []);
 
-    if (!currentDate) return null; // or a loading spinner
+    if (!currentDate) return null;
 
     const days = Array.from({ length: 7 }, (_, i) => {
         const d = new Date(currentDate);
@@ -71,7 +71,7 @@ export default function Stats() {
                 <button onClick={handlePrevWeek} className="nav-btn" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', fontSize: '1.2rem' }}>
                     <FaChevronLeft />
                 </button>
-                <h3>Ostatnie 7 dni</h3>
+                <h3>Efektywność w ciągu 7 dni</h3>
                 <button onClick={handleNextWeek} disabled={isCurrentWeek} className="nav-btn" style={{ background: 'none', border: 'none', cursor: isCurrentWeek ? 'default' : 'pointer', color: isCurrentWeek ? 'var(--text-secondary)' : 'var(--text-primary)', opacity: isCurrentWeek ? 0.5 : 1, fontSize: '1.2rem' }}>
                     <FaChevronRight />
                 </button>
