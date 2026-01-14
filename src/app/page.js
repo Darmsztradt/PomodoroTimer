@@ -7,6 +7,8 @@ import QuoteDisplay from '@/components/QuoteDisplay';
 import TimerHeader from '@/components/TimerHeader';
 import TimerControls from '@/components/TimerControls';
 import TasksSection from '@/components/TasksSection';
+import FunFact from '@/components/FunFact';
+import PetReward from '@/components/PetReward';
 
 export default function Home() {
     const { timeLeft, isActive, mode, toggleTimer, resetTimer, formatTime, switchMode, MODES } = usePomodoroTimer();
@@ -25,6 +27,10 @@ export default function Home() {
                 toggleTimer={toggleTimer}
                 resetTimer={resetTimer}
             />
+
+            {/* Nowe komponenty */}
+            <PetReward mode={mode} />
+            <FunFact />
 
             <TasksSection {...taskProps} />
             <QuoteDisplay />

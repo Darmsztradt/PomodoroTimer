@@ -11,9 +11,9 @@ export const SettingsProvider = ({ children }) => {
     const [theme, setTheme] = useState('light');
     const [volume, setVolume] = useState(0.5);
     const [timerSettings, setTimerSettings] = useState({
-        work: 25,
-        short_break: 5,
-        long_break: 15,
+        work: 25 * 60,
+        short_break: 5 * 60,
+        long_break: 15 * 60,
         autoStart: false
     });
     const [loading, setLoading] = useState(true);
@@ -24,7 +24,19 @@ export const SettingsProvider = ({ children }) => {
             if (storedSettings) {
                 if (storedSettings.theme) setTheme(storedSettings.theme);
                 if (storedSettings.volume !== undefined) setVolume(storedSettings.volume);
-                if (storedSettings.timerSettings) setTimerSettings(storedSettings.timerSettings);
+
+                if (storedSettings.timerSettings) {
+
+                    const newSettings = { ...storedSettings.timerSettings };
+
+                    ['work', 'short_break', 'long_break'].forEach(key => {
+                        if (newSettings[key] && newSettings[key] <= 180) {
+                            newSettings[key] = Math.round(newSettings[key] * 60);
+                        }
+                    });
+
+                    setTimerSettings(newSettings);
+                }
             }
             setLoading(false);
         };

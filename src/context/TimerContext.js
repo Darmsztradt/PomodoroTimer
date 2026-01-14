@@ -27,12 +27,6 @@ export const TimerProvider = ({ children }) => {
         isActive: false
     };
 
-    const convertToSeconds = (minutes) => {
-        const m = Math.floor(minutes);
-        const s = Math.round((minutes - m) * 100);
-        return m * 60 + s;
-    };
-
     const timerReducer = (state, action) => {
         switch (action.type) {
             case 'SET_MODE':
@@ -40,7 +34,7 @@ export const TimerProvider = ({ children }) => {
                     ...state,
                     mode: action.payload,
                     isActive: false,
-                    timeLeft: convertToSeconds(timerSettings?.[action.payload] || 25)
+                    timeLeft: timerSettings?.[action.payload] || (state.mode === MODES.WORK ? 1500 : 300)
                 };
             case 'TICK':
                 if (state.timeLeft <= 0) return state;
@@ -57,7 +51,7 @@ export const TimerProvider = ({ children }) => {
                 return {
                     ...state,
                     isActive: false,
-                    timeLeft: convertToSeconds(timerSettings?.[state.mode] || 25)
+                    timeLeft: timerSettings?.[state.mode] || 1500
                 };
             case 'STOP':
                 return {
@@ -65,18 +59,17 @@ export const TimerProvider = ({ children }) => {
                     isActive: false
                 };
             case 'SYNC_SETTINGS':
-                // Sync (nieaktywny)
                 if (state.isActive) return state;
                 return {
                     ...state,
-                    timeLeft: convertToSeconds(timerSettings?.[state.mode] || 25)
+                    timeLeft: timerSettings?.[state.mode] || 1500
                 };
             case 'NEXT_INTERVAL':
                 return {
                     ...state,
                     mode: action.payload.mode,
                     isActive: action.payload.autoStart,
-                    timeLeft: convertToSeconds(timerSettings?.[action.payload.mode] || 25)
+                    timeLeft: timerSettings?.[action.payload.mode] || 1500
                 };
             default:
                 return state;
