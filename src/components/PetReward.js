@@ -2,36 +2,43 @@
 
 import React, { useState, useEffect } from 'react';
 
+import { useFetch } from '../hooks/useFetch';
+
+const DOG_API = 'https://dog.ceo/api/breeds/image/random';
+const CAT_API = 'https://api.thecatapi.com/v1/images/search';
+
 export default function PetReward({ mode }) {
+    const [currentApi, setCurrentApi] = useState(null);
+    const { data, loading, error, refetch } = useFetch(currentApi);
+
     const [imageUrl, setImageUrl] = useState('');
-    const [loading, setLoading] = useState(false);
 
-    const fetchPet = async () => {
-        setLoading(true);
-        try {
-            const isDog = Math.random() > 0.5;
-            let url = '';
+    useEffect(() => {
+        if (!data) return;
 
-            if (isDog) {
-                const res = await fetch('https://dog.ceo/api/breeds/image/random');
-                const data = await res.json();
-                url = data.message;
-            } else {
-                const res = await fetch('https://api.thecatapi.com/v1/images/search');
-                const data = await res.json();
-                url = data[0].url;
-            }
-            setImageUrl(url);
-        } catch (error) {
-            console.error('Failed to fetch pet', error);
-        } finally {
-            setLoading(false);
+        if (currentApi === DOG_API) {
+            setImageUrl(data.message);
+        } else if (currentApi === CAT_API) {
+            setImageUrl(data[0]?.url);
+        }
+    }, [data, currentApi]);
+
+    const handleNewPet = () => {
+        const isDog = Math.random() > 0.5;
+        const newApi = isDog ? DOG_API : CAT_API;
+
+        if (newApi === currentApi) {
+            refetch();
+        } else {
+            setCurrentApi(newApi);
         }
     };
 
     useEffect(() => {
         if (mode === 'short_break' || mode === 'long_break') {
-            fetchPet();
+            handleNewPet();
+        } else {
+            setCurrentApi(null);
         }
     }, [mode]);
 
@@ -58,7 +65,7 @@ export default function PetReward({ mode }) {
                 )}
             </div>
             <button
-                onClick={fetchPet}
+                onClick={handleNewPet}
                 style={{
                     marginTop: '10px',
                     background: 'var(--primary-color)',

@@ -26,16 +26,7 @@ export const SettingsProvider = ({ children }) => {
                 if (storedSettings.volume !== undefined) setVolume(storedSettings.volume);
 
                 if (storedSettings.timerSettings) {
-
-                    const newSettings = { ...storedSettings.timerSettings };
-
-                    ['work', 'short_break', 'long_break'].forEach(key => {
-                        if (newSettings[key] && newSettings[key] <= 180) {
-                            newSettings[key] = Math.round(newSettings[key] * 60);
-                        }
-                    });
-
-                    setTimerSettings(newSettings);
+                    setTimerSettings(storedSettings.timerSettings);
                 }
             }
             setLoading(false);
